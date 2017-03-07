@@ -1,0 +1,25 @@
+application: report0tron
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: yes
+
+handlers:
+- url: /favicon\.ico
+  static_files: favicon.ico
+  upload: favicon\.ico
+
+- url: /(.*\.(bmp|gif|ico|jpeg|jpg|png|js|css|html|json|mp4|webm|zip))
+  static_files: static/\1
+  upload: static/(.*\.(bmp|gif|ico|jpeg|jpg|png|js|css|html|json|mp4|webm|zip))
+
+- url: .*
+  script: main.app
+
+libraries:
+- name: webapp2
+  version: "2.5.2"
+- name: jinja2
+  version: latest
+- name: ssl
+  version: latest

@@ -1,0 +1,287 @@
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="jquery.min.js"></script>
+<!--<script src="jquery.ba-bbq.min.js"></script>-->
+
+<!-- Latest compiled JavaScript -->
+<!--<script src="bootstrap.min.js"></script>-->
+
+<link rel="stylesheet" type="text/css" href="mainPage.css">
+
+<link rel="stylesheet" href="main.css">
+<script src="iosbadge.js"></script>
+<!-- <script src="socket.io.js"></script> -->
+<script src="mainfile.js"></script>
+<!--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD6o4Kyxk0h9MDMQclZLFOxrDyx-yXgRrM"></script>-->
+
+<!--
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvZMa53hTpSYxF9KV2tWW4fTfU1bKgLrQ "></script>
+-->
+<html>
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+       #map {
+        height: 100%;
+        width: 100%;
+       }
+    </style>
+  </head>
+  <body>
+    <h3>{{Heading}}</h3>
+    <div id="map"></div>
+    <script>
+
+    aMarker = "NotSetup";
+
+    var lastLong = 43.6532;
+    var lastLat = -79.3832;
+
+      function initMap() {
+        var uluru = {lat: 43.6532, lng: -79.3832};
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 18,
+          center: uluru
+        });
+
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function (position) {
+          initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+          map.setCenter(initialLocation);
+        });
+      }
+
+      theData = [
+
+      {% for aItem in Markers %}
+      { 'LAT':{{aItem.Latitude}} ,'LONG':{{aItem.Longitude}},'ID':"{{aItem.ID}}" },
+
+      {% endfor %}
+
+    ]
+
+    var newMarkers = []
+
+    var len = theData.length;
+
+    for (i=0; i<len; ++i) {
+
+      var aMark = theData[i];
+
+      var aMarker = new google.maps.Marker({
+        position: new google.maps.LatLng(aMark['LAT'], aMark['LONG']),
+        map:map,
+        icon : "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+        title: 'Incident'
+      })
+      aMarker.metaData=theData[i];
+
+
+      google.maps.event.addListener(aMarker, 'click', function() {
+        var marker = this;
+
+
+
+          $.ajax({
+              type: 'POST',
+              url: "/GetKey",
+              data: {"Key":this.metaData.ID},
+          }).done(function(data) {
+            console.log(data);
+            data = JSON.parse(data)
+
+            var len = data.length;
+
+            for (i=0; i<len; ++i) {
+                object = data[i];
+                target = document.getElementById(object['Key'])
+                target.value = object['Value']
+                openNav()
+
+            }
+
+
+
+            console.log(data);
+
+
+
+          })
+      });
+
+
+
+      newMarkers.push(aMarker)
+
+    }
+
+
+
+
+/*
+      aMarker = new google.maps.Marker({
+        position: new google.maps.LatLng(latitude, longitude),
+        map:map,
+        icon : "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+        title: 'Incident'
+      })
+      */
+    }
+
+      /* Open when someone clicks on the span element */
+function openNav() {
+    document.getElementById("myNav").style.width = "100%";
+}
+
+/* Close when someone clicks on the "x" symbol inside the overlay */
+function closeNav() {
+    document.getElementById("myNav").style.width = "0%";
+}
+
+var activate=true;
+
+function sendInfo(ev){
+
+  if (activate==false){
+    return false;
+  }
+
+  //activate=false;
+
+
+  var data = {};
+
+{
+  var anArray = document.getElementsByClassName("ItemV")
+
+  var len = anArray.length;
+
+  for (i=0; i<len; ++i) {
+    if (i in anArray) {
+      object = anArray[i];
+      data[object.id]=object.value;
+    }
+  }
+}
+
+{
+  var anArray = document.getElementsByClassName("itemL")
+
+  var len = anArray.length;
+
+  for (i=0; i<len; ++i) {
+    if (i in anArray) {
+      object = anArray[i];
+      data[object.id]=object.value;
+    }
+  }
+}
+
+data['Longitude']=lastLong
+data['Latitude']=lastLat
+
+
+
+
+
+
+  $.ajax({
+      type: 'POST',
+      url: "/File",
+      data: {"JSON":JSON.stringify(data)},
+  }).done(function(data) {
+    console.log(data)
+
+
+  })
+
+
+
+
+
+
+  return false
+}
+
+    </script>
+
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvZMa53hTpSYxF9KV2tWW4fTfU1bKgLrQ&callback=initMap">
+    </script>
+
+  </body>
+</html>
+
+<!-- The overlay -->
+<div id="myNav" class="overlay">
+
+  <div id="hackWrapper" class="hackWrapper">
+
+  <!-- Button to close the overlay navigation -->
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+
+  <!-- Overlay content -->
+  <div class="overlay-content">
+
+
+    <div class="form" onsubmit="return sendInfo()">
+
+      <div class="tab-content">
+        <div id="signup">
+          <h1>Incident Report at this address.</h1>
+
+          <form action="/" method="post">
+
+          <div class="top-row">
+            {% for aItem in FormItems %}
+
+
+             {% if aItem.Type == "SL" %}
+            <div class="field-wrap">
+              <label>
+                {{aItem.Text}}{% if aItem.Required %} <span class="req">*</span>  {% endif %}
+              </label>
+              <input type="text" class ="ItemV" id="{{aItem.ID}}" {% if aItem.Required %}required{% endif %} autocomplete="off" />
+            </div>
+
+            {% elif aItem.Type == "LT" %}
+            <div class="field-wrap">
+              <label>
+                {{aItem.Text}}
+              </label>
+              <textarea rows="4" class ="itemL" cols="50" name="comment" id="{{aItem.ID}}" form="usrform"></textarea>
+            </div>
+
+
+            {% endif %}
+            {% endfor %}
+
+
+
+
+
+          </form>
+
+        </div>
+
+
+
+      </div><!-- tab-content -->
+
+</div> <!-- /form -->
+
+
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Use any element to open/show the overlay navigation menu -->
+
+</html>

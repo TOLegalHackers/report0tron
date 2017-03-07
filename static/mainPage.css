@@ -1,0 +1,46 @@
+#PlaceName{
+
+font-size: 14;
+}
+#NoteText{
+
+  font-size: 13;
+}
+#Time{
+font-size: 14;
+
+}
+
+#Small{
+font-size: 10;
+
+}
+
+.Center{
+text-align: center; 
+}
+
+.firstButton{
+
+  position: absolute;
+  x = 10;
+  y = 10;
+
+
+}
+
+
+.btn.pill{
+  -webkit-border-radius: 16px;
+  -moz-border-radius: 16px;
+  border-radius: 16px;
+  background-color: #03a6f1;
+
+}
+
+
+#HOT_VENUES:active  {
+  -webkit-filter: brightness(50%); /* Safari 6.0 - 9.0 */
+  filter: brightness(50%);
+
+}
